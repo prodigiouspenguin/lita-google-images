@@ -15,29 +15,33 @@ module Lita
 
       def fetch(response)
         query = response.matches[0][0]
-
-        http_response = http.get(
-          URL,
-          v: "1.0",
-          q: query,
-          safe: safe_value,
-          rsz: 8
-        )
-
-        data = MultiJson.load(http_response.body)
-
-        if data["responseStatus"] == 200
-          choice = data["responseData"]["results"].sample
-          if choice
-            response.reply ensure_extension(choice["unescapedUrl"])
-          else
-            response.reply %{No images found for "#{query}".}
-          end
+        
+        if query == "nerd"
+          response.reply "https://s3.amazonaws.com/uploads.hipchat.com/100435/736860/Ws7YsUi16ZqVIdO/10494679_274598749390335_7574233383180516120_n.jpg"
         else
-          reason = data["responseDetails"] || "unknown error"
-          Lita.logger.warn(
-            "Couldn't get image from Google: #{reason}"
+          http_response = http.get(
+            URL,
+            v: "1.0",
+            q: query,
+            safe: safe_value,
+            rsz: 8
           )
+
+          data = MultiJson.load(http_response.body)
+
+         if data["responseStatus"] == 200
+            choice = data["responseData"]["results"].sample
+            if choice
+              response.reply ensure_extension(choice["unescapedUrl"])
+            else
+              response.reply %{No images found for "#{query}".}
+            end
+          else
+            reason = data["responseDetails"] || "unknown error"
+            Lita.logger.warn(
+              "Couldn't get image from Google: #{reason}"
+            )
+          end
         end
       end
 
